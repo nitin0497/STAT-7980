@@ -84,24 +84,69 @@ ggplot(data, aes(x = index)) +
   labs(x = "Time", y = "Variance", color = "Variance Type") +
   theme_minimal()
 
+####simulation to extract coefficients####
+n=20000
+# Simulate an ARCH(1) series
+arch <- simulate_GARCH(n = n, omega = 0.1, alpha = 0.7)
 
-#extracting the model coefficients to verify
-#ARCH
-sim_arch_spec <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,0)),
-                         mean.model = list(armaOrder = c(0,0), include.mean = TRUE),
-                         distribution.model = "norm")
+# Simulate a GARCH(1,1) series
+garch <- simulate_GARCH(n = n, omega = 0.1, alpha = 0.7, beta = 0.3)
 
-sim_arch_model <- ugarchfit(data = arch$resid, spec = sim_arch_spec)
-sim_arch_model@fit[["matcoef"]][,1]
 
-#GARCH
-sim_garch_spec <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
-                         mean.model = list(armaOrder = c(0,0), include.mean = TRUE),
-                         distribution.model = "norm")
+arch_sim=function(){
+  n=sample(1:1000, 1)
+  sampled=arch$resid[n:15000+n]
+  #ARCH
+  sim_arch_spec <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,0)),
+                              mean.model = list(armaOrder = c(0,0), include.mean = TRUE),
+                              distribution.model = "norm")
+  
+  sim_arch_model <- ugarchfit(data = sampled, spec = sim_arch_spec)
+  arch_est=sim_arch_model@fit[["matcoef"]][,1]
+  
+  return(arch_est)
+}
 
-# Fit the model
-sim_garch_model <- ugarchfit(data = garch$resid, spec = sim_garch_spec)
-sim_garch_model@fit[["matcoef"]][,1]
+garch_sim=function(){
+  n=sample(1:1000, 1)
+  sampled=garch$resid[n:15000+n]
+  
+  #GARCH
+  sim_garch_spec <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+                               mean.model = list(armaOrder = c(0,0), include.mean = TRUE),
+                               distribution.model = "norm")
+  
+  # Fit the model
+  sim_garch_model <- ugarchfit(data = sampled, spec = sim_garch_spec)
+  garch_est=sim_garch_model@fit[["matcoef"]][,1]
+  
+  return(garch_est)
+}
+
+arch_param=c()
+garch_param=c()
+
+for (i in 1:150){
+  arch_param=rbind(arch_param,arch_sim())
+  garch_param=rbind(garch_param,garch_sim())
+}
+
+#ARCH plot
+plot(arch_param[,2],type="l",ylim=c(0,1),col="blue",xlab="iteration",ylab="Estimates",main="Line Plot of Estimates")
+lines(arch_param[,3],col="red")
+text(arch_param[length(arch_param[,2]),2], " omega", pos = 1, offset = 0.5, col = "blue")
+text(arch_param[length(arch_param[,3]),3], "alpha", pos = 1, offset = 0.5, col = "red")
+
+#GARCH plot
+plot(garch_param[,2],type="l",ylim=c(0,1),col="blue",xlab="iteration",ylab="Estimates",main="Line Plot of Estimates")
+lines(garch_param[,3],col="red")
+lines(garch_param[,4],col="green")
+text(garch_param[length(garch_param[,2]),2], " omega", pos = 1, offset = 0.5, col = "blue")
+text(garch_param[length(garch_param[,3]),3], "alpha", pos = 1, offset = 0.5, col = "red")
+text(garch_param[length(garch_param[,4]),4], "beta", pos = 1, offset = 0.5, col = "green")
+
+
+
 
 
 ####BP-test,ADF test####
