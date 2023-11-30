@@ -126,24 +126,25 @@ garch_sim=function(){
 arch_param=c()
 garch_param=c()
 
-for (i in 1:150){
+for(i in 1:50){
   arch_param=rbind(arch_param,arch_sim())
   garch_param=rbind(garch_param,garch_sim())
 }
 
+par(mfrow=c(1,1))
 #ARCH plot
-plot(arch_param[,2],type="l",ylim=c(0,1),col="blue",xlab="iteration",ylab="Estimates",main="Line Plot of Estimates")
+plot(arch_param[,2],type="l",ylim=c(0,1),col="blue",xlab="iteration",ylab="Estimates",main="Line Plot of ARCH Estimates")
 lines(arch_param[,3],col="red")
-text(arch_param[length(arch_param[,2]),2], " omega", pos = 1, offset = 0.5, col = "blue")
-text(arch_param[length(arch_param[,3]),3], "alpha", pos = 1, offset = 0.5, col = "red")
+text(0.05, "omega=0.1", pos = 4, offset = 0.5, col = "blue")
+text(0.65, "alpha=0.7", pos = 4, offset = 0.5, col = "red")
 
 #GARCH plot
-plot(garch_param[,2],type="l",ylim=c(0,1),col="blue",xlab="iteration",ylab="Estimates",main="Line Plot of Estimates")
+plot(garch_param[,2],type="l",ylim=c(0,1),col="blue",xlab="iteration",ylab="Estimates",main="Line Plot of GARCH Estimates")
 lines(garch_param[,3],col="red")
 lines(garch_param[,4],col="green")
-text(garch_param[length(garch_param[,2]),2], " omega", pos = 1, offset = 0.5, col = "blue")
-text(garch_param[length(garch_param[,3]),3], "alpha", pos = 1, offset = 0.5, col = "red")
-text(garch_param[length(garch_param[,4]),4], "beta", pos = 1, offset = 0.5, col = "green")
+text(0.05, "omega=0.1", pos = 4, offset = 0.5, col = "blue")
+text(0.65, "alpha=0.7", pos = 4, offset = 0.5, col = "red")
+text(0.25, "beta=0.3", pos = 4, offset = 0.5, col = "green")
 
 
 
